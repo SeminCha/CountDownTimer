@@ -7,12 +7,10 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Vibrator;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -24,12 +22,12 @@ public class CountDownTimerActivity extends Activity {
     private static final int COUNT_DOWN_INTERVAL = 1000;
 
     int count;
-
+    private CustomDialog mCustomDialog;
     TextView countTxt;
     CountDownTimer countDownTimer;
     Vibrator vibrator;
     MediaPlayer mp;
-    private PopupWindow window;
+    //private PopupWindow window;
     private Button btn_cancel;
     private int mWidthPixels, mHeightPixels;
 
@@ -47,7 +45,7 @@ public class CountDownTimerActivity extends Activity {
 
     public void btn_countdown_click(View v) {
 
-        initiatePopupWindow();
+        initiateAlertDialog();
     }
 
 //    public void btn_cancel_click(View v) {
@@ -63,7 +61,7 @@ public class CountDownTimerActivity extends Activity {
 
             public void onTick(long millisUntilFinished) {
                 playSound();
-                countTxt.setText(String.valueOf(count));
+                CustomDialog.setCountTxt(String.valueOf(count));
                 vibrator.vibrate(500);
                 count--;
 
@@ -71,9 +69,9 @@ public class CountDownTimerActivity extends Activity {
 
             public void onFinish() {
 
-                countTxt.setText(String.valueOf("신고완료"));
+                CustomDialog.setCountTxt(String.valueOf("신고완료"));
                 mp.stop();
-                window.dismiss();
+                mCustomDialog.dismiss();
             }
         };
     }
@@ -114,39 +112,42 @@ public class CountDownTimerActivity extends Activity {
 
     }
 
-    private void initiatePopupWindow() {
+    private void initiateAlertDialog() {
         try {
-            //  LayoutInflater 객체와 시킴
-            LayoutInflater inflater = (LayoutInflater) CountDownTimerActivity.this
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//            //  LayoutInflater 객체와 시킴
+           LayoutInflater inflater = (LayoutInflater) CountDownTimerActivity.this
+                  .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 
             View layout = inflater.inflate(R.layout.activity_countdown_timer,
-                    (ViewGroup) findViewById(R.id.countdown_window));
+                  (ViewGroup) findViewById(R.id.countdown_window));
 
-            window = new PopupWindow(layout, 600, 500, true);
-            window.showAtLocation(layout, Gravity.CENTER, 0, 0);
-            btn_cancel = (Button) layout.findViewById(R.id.btn_cancel);
-            btn_cancel.setOnClickListener(cancel_button_click_listener);
-            countTxt = (TextView) layout.findViewById(R.id.count_txt);
+//            window = new PopupWindow(layout, 600, 500, true);
+//            window.showAtLocation(layout, Gravity.CENTER, 0, 0);
+//            btn_cancel = (Button) layout.findViewById(R.id.btn_cancel);
+//            btn_cancel.setOnClickListener(cancel_button_click_listener);
+            mCustomDialog = new CustomDialog(this, cancelClickListener);
+
             vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             mp = new MediaPlayer();
             count = 20;
             countDownTimer();
             countDownTimer.start();
+
+            mCustomDialog.show();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     //팝업창 닫기
-    private View.OnClickListener cancel_button_click_listener =
+    private View.OnClickListener cancelClickListener =
             new View.OnClickListener() {
 
                 public void onClick(View v) {
                     countDownTimer.cancel();
                     mp.stop();
-                    window.dismiss();
+                   mCustomDialog.dismiss();
                 }
             };
 
